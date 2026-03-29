@@ -108,4 +108,4 @@ Check Logs:
 docker compose -f docker/compose.yaml logs -f wallet-app
 
 Stop Services:
-docker compose -f docker/compose.yaml down
+docker compose -f docker/compose.yaml stop
