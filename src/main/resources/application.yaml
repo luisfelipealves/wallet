@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: crypto-wallet-service
+
+  docker:
+    compose:
+      enabled: false
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 300000  # 5 minutos em ms
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+      timeout: 2000
+      repositories:
+        enabled: false
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/crypto_db
+    username: myuser
+    password: ${DB_PASSWORD:secret}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate # Cria/atualiza as tabelas automaticamente em desenvolvimento
+    show-sql: false # Mostra as queries no console (bom para debug)
+    properties:
+      hibernate:
+        "[format_sql]": true
+        "[highlight_sql]": true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+
+coincap:
+  base-url: https://rest.coincap.io/v3
+  api-token: ${COINCAP_API_TOKEN:}
+  price-by-symbol-path: /price/bysymbol/{symbol}
+
+application:
+  validation:
+    asset-symbol-pattern: "^[A-Z]{3,4}$"
+  thread-pool:
+    core-size: 3
+    max-size: 3
+    queue-capacity: 500
+    thread-name-prefix: "CoinCap-"
+  

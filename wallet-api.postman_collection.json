@@ -1,0 +1,359 @@
+{
+  "info": {
+    "name": "Wallet API",
+    "description": "Collection para as APIs do projeto Wallet — gerenciamento de carteiras de criptoativos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "walletId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Wallet",
+      "description": "Operações relacionadas à carteira de ativos",
+      "item": [
+        {
+          "name": "Criar carteira",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Minha Carteira\",\n  \"userId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Cria uma nova carteira vazia para o usuário. Retorna o ID da carteira criada."
+          },
+          "response": [
+            {
+              "name": "201 - Carteira criada com sucesso",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"walletId\": 1\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('Body contém walletId', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('walletId');",
+                  "    pm.collectionVariables.set('walletId', json.walletId);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar carteira",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets/{{walletId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets", "{{walletId}}"]
+            },
+            "description": "Retorna os dados da carteira e seus ativos com data de compra (sem valores atuais)."
+          },
+          "response": [
+            {
+              "name": "200 - Carteira encontrada",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Minha Carteira\",\n  \"userId\": 1,\n  \"assets\": [\n    {\n      \"id\": 1,\n      \"symbol\": \"BTC\",\n      \"quantity\": 0.5,\n      \"purchasedAt\": \"2024-01-01T10:30:00\"\n    }\n  ]\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Body contém id', () => pm.expect(pm.response.json()).to.have.property('id'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Comprar ativo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets/{{walletId}}/assets/purchase",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets", "{{walletId}}", "assets", "purchase"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"symbol\": \"BTC\",\n  \"quantity\": 0.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Adiciona um novo ativo à carteira. O símbolo deve ser válido (3-4 caracteres maiúsculos). Quantidade mínima: 0.001, máxima: 1000000."
+          },
+          "response": [
+            {
+              "name": "201 - Ativo comprado com sucesso",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"symbol\": \"BTC\",\n  \"quantity\": 0.5,\n  \"purchasedAt\": \"2024-01-01T10:30:00\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('Body contém symbol', () => pm.expect(pm.response.json()).to.have.property('symbol'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Valor atual da carteira",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets/{{walletId}}/value",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets", "{{walletId}}", "value"]
+            },
+            "description": "Retorna o valor total da carteira com os preços atuais de cada ativo."
+          },
+          "response": [
+            {
+              "name": "200 - Valor atual retornado",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"totalValue\": 35000.00,\n  \"assets\": [\n    {\n      \"symbol\": \"BTC\",\n      \"quantity\": 0.5,\n      \"currentPrice\": 70000.00,\n      \"currentValue\": 35000.00\n    }\n  ]\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Body contém totalValue', () => pm.expect(pm.response.json()).to.have.property('totalValue'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Valor histórico da carteira",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets/{{walletId}}/value/historical?date=2024-01-01T10:30:00",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets", "{{walletId}}", "value", "historical"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2024-01-01T10:30:00",
+                  "description": "Data para consulta do valor histórico (formato: yyyy-MM-ddTHH:mm:ss)"
+                }
+              ]
+            },
+            "description": "Retorna o valor total da carteira em uma data específica com os preços históricos de cada ativo."
+          },
+          "response": [
+            {
+              "name": "200 - Valor histórico retornado",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"totalValue\": 22000.00,\n  \"assets\": [\n    {\n      \"symbol\": \"BTC\",\n      \"quantity\": 0.5,\n      \"currentPrice\": 44000.00,\n      \"currentValue\": 22000.00\n    }\n  ]\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Body contém totalValue', () => pm.expect(pm.response.json()).to.have.property('totalValue'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Performance da carteira",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/wallets/{{walletId}}/performance?date=2024-01-01T10:30:00",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallets", "{{walletId}}", "performance"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2024-01-01T10:30:00",
+                  "description": "Data para cálculo da performance (formato: yyyy-MM-ddTHH:mm:ss)"
+                }
+              ]
+            },
+            "description": "Retorna a performance de cada ativo da carteira em uma data específica, comparando o preço de compra com o preço histórico."
+          },
+          "response": [
+            {
+              "name": "200 - Performance calculada",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"assets\": [\n    {\n      \"symbol\": \"BTC\",\n      \"quantity\": 0.5,\n      \"purchasePrice\": 40000.00,\n      \"historicalPrice\": 44000.00,\n      \"performancePercent\": 10.00\n    }\n  ]\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Asset History",
+      "description": "Operações relacionadas ao histórico de preços dos ativos",
+      "item": [
+        {
+          "name": "Histórico de preços de um ativo",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/assets/history/BTC?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "assets", "history", "BTC"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Número da página (começando em 0)"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Quantidade de registros por página"
+                }
+              ]
+            },
+            "description": "Retorna o histórico de preços de um ativo com paginação. O símbolo deve ter entre 2 e 10 caracteres maiúsculos."
+          },
+          "response": [
+            {
+              "name": "200 - Histórico retornado",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"content\": [\n    {\n      \"symbol\": \"BTC\",\n      \"price\": 44000.00,\n      \"recordedAt\": \"2024-01-01T10:30:00\"\n    }\n  ],\n  \"pageable\": {\n    \"pageNumber\": 0,\n    \"pageSize\": 10\n  },\n  \"totalElements\": 100,\n  \"totalPages\": 10,\n  \"last\": false,\n  \"first\": true\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 OK', () => pm.response.to.have.status(200));",
+                  "pm.test('Body contém content', () => pm.expect(pm.response.json()).to.have.property('content'));",
+                  "pm.test('Body é paginado', () => pm.expect(pm.response.json()).to.have.property('totalElements'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

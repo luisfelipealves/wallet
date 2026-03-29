@@ -1,0 +1,36 @@
+spring:
+  docker:
+    compose:
+      enabled: true
+      file: docker/compose-local.yaml
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/crypto_db
+    username: myuser
+    password: secret
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  jpa:
+    hibernate:
+      ddl-auto: update # Cria/atualiza as tabelas automaticamente em desenvolvimento
+    show-sql: true
+    properties:
+      hibernate:
+        "[format_sql]": true
+        "[highlight_sql]": true
+
+coincap:
+  api-token: ${COINCAP_API_TOKEN:3470510434ee544303a98deac5cbdb26a143d57e4a08a55871b929062d286f25}
+
+logging:
+  level:
+    com:
+      example:
+        wallet: DEBUG
+    org:
+      springframework:
+        cache: DEBUG
