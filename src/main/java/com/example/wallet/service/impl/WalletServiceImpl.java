@@ -1,5 +1,7 @@
 package com.example.wallet.service.impl;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
 import com.example.wallet.entity.WalletEntity;
@@ -18,13 +20,14 @@ public class WalletServiceImpl implements WalletService {
     private final WalletMapper walletMapper;
 
     @Override
-    public Long createWallet(String name, Long userId) {
+    public UUID createWallet(String name, Long userId) {
         WalletEntity wallet = new WalletEntity();
+        wallet.setUuid(UUID.randomUUID());
         wallet.setName(name);
         wallet.setUserId(userId);
 
         WalletEntity savedWallet = walletRepository.save(wallet);
-        return savedWallet.getId();
+        return savedWallet.getUuid();
     }
 
     @Override

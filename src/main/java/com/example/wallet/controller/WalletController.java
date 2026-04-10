@@ -53,8 +53,8 @@ public class WalletController {
         public ResponseEntity<CreateWalletResponseDTO> createWallet(
                         @RequestBody @Valid CreateWalletRequestDTO request) {
 
-                Long walletId = walletService.createWallet(request.name(), request.userId());
-                return ResponseEntity.status(HttpStatus.CREATED).body(new CreateWalletResponseDTO(walletId));
+                java.util.UUID walletUuid = walletService.createWallet(request.name(), request.userId());
+                return ResponseEntity.status(HttpStatus.CREATED).body(new CreateWalletResponseDTO(walletUuid));
         }
 
         @GetMapping("/{walletId}")
