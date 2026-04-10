@@ -2,6 +2,7 @@ package com.example.wallet.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,7 @@ public class AssetServiceImpl implements com.example.wallet.service.AssetService
 
     @Override
     @Transactional
-    public AssetDTO purchaseAsset(long walletId, String symbol, BigDecimal quantity) {
+    public AssetDTO purchaseAsset(UUID walletId, String symbol, BigDecimal quantity) {
 
         BigDecimal assetPrice = assetHistoryService.recordCurrentPrice(symbol);
         if (assetPrice == null) {
@@ -39,7 +40,7 @@ public class AssetServiceImpl implements com.example.wallet.service.AssetService
         assetEntity.setSymbol(symbol);
         assetEntity.setQuantity(quantity);
         assetEntity.setPurchasePrice(assetPrice);
-        assetEntity.setWallet(walletRepository.findById(walletId)
+        assetEntity.setWallet(walletRepository.findByUuid(walletId)
                 .orElseThrow(() -> new WalletNotFoundException(walletId)));
         assetEntity.setPurchaseDate(LocalDateTime.now());
 

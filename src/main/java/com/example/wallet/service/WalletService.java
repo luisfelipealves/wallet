@@ -8,5 +8,5 @@ public interface WalletService {
 
     UUID createWallet(String name, Long userId);
 
-    WalletDTO getWallet(Long walletId);
+    WalletDTO getWallet(UUID walletId);
 }

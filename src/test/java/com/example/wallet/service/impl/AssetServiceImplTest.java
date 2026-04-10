@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,6 +56,7 @@ class AssetServiceImplTest {
         // Setup test data
         walletEntity = new WalletEntity();
         walletEntity.setId(1L);
+        walletEntity.setUuid(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"));
         walletEntity.setName("Test Wallet");
         walletEntity.setUserId(100L);
 
@@ -79,13 +81,13 @@ class AssetServiceImplTest {
     @DisplayName("Should purchase asset successfully and return AssetDTO")
     void testPurchaseAssetSuccess() {
         // Arrange
-        long walletId = 1L;
+        UUID walletId = walletEntity.getUuid();
         String symbol = "BTC";
         BigDecimal quantity = new BigDecimal("0.5");
         BigDecimal price = new BigDecimal("45000.00");
 
         when(assetHistoryService.recordCurrentPrice(symbol)).thenReturn(price);
-        when(walletRepository.findById(walletId)).thenReturn(Optional.of(walletEntity));
+        when(walletRepository.findByUuid(walletId)).thenReturn(Optional.of(walletEntity));
         when(assetRepository.save(any(AssetEntity.class))).thenReturn(savedAssetEntity);
         when(assetMapper.toAssetDTO(any(AssetEntity.class))).thenReturn(expectedAssetDTO);
 
@@ -98,11 +100,11 @@ class AssetServiceImplTest {
         assertEquals(symbol, result.symbol());
         assertEquals(quantity, result.quantity());
         assertEquals(price, result.value());
-        assertEquals(walletId, result.walletId());
+        assertEquals(walletEntity.getId(), result.walletId());
 
         // Verify interactions
         verify(assetHistoryService, times(1)).recordCurrentPrice(symbol);
-        verify(walletRepository, times(1)).findById(walletId);
+        verify(walletRepository, times(1)).findByUuid(walletId);
         verify(assetRepository, times(1)).save(any(AssetEntity.class));
         verify(assetMapper, times(1)).toAssetDTO(any(AssetEntity.class));
     }

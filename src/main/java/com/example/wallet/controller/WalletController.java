@@ -32,6 +32,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/wallets")
@@ -65,7 +66,7 @@ public class WalletController {
                         @ApiResponse(responseCode = "500", description = "Internal server error")
         })
         public ResponseEntity<WalletDTO> getWallet(
-                        @Parameter(description = "Wallet ID", required = true) @PathVariable Long walletId) {
+                        @Parameter(description = "Wallet UUID", required = true) @PathVariable UUID walletId) {
 
                 WalletDTO wallet = walletService.getWallet(walletId);
                 return ResponseEntity.ok(wallet);
@@ -80,7 +81,7 @@ public class WalletController {
                         @ApiResponse(responseCode = "500", description = "Internal server error")
         })
         public ResponseEntity<AssetDTO> addAssetToWallet(
-                        @Parameter(description = "Wallet ID", required = true) @PathVariable Long walletId,
+                        @Parameter(description = "Wallet UUID", required = true) @PathVariable UUID walletId,
                         @RequestBody @Valid PurchaseRequestDTO request) { // Using RequestBody is better than
                                                                           // RequestParam
 
@@ -96,7 +97,7 @@ public class WalletController {
                         @ApiResponse(responseCode = "500", description = "Internal server error")
         })
         public ResponseEntity<WalletValueDTO> getCurrentWalletValue(
-                        @Parameter(description = "Wallet ID", required = true) @PathVariable Long walletId) {
+                        @Parameter(description = "Wallet UUID", required = true) @PathVariable UUID walletId) {
 
                 WalletValueDTO walletValue = walletValuationService.getCurrentWalletValue(walletId);
                 return ResponseEntity.ok(walletValue);
@@ -111,7 +112,7 @@ public class WalletController {
                         @ApiResponse(responseCode = "500", description = "Internal server error")
         })
         public ResponseEntity<WalletValueDTO> getHistoricalWalletValue(
-                        @Parameter(description = "Wallet ID", required = true) @PathVariable Long walletId,
+                        @Parameter(description = "Wallet UUID", required = true) @PathVariable UUID walletId,
                         @Parameter(description = "Date to query historical value", required = true, example = "2024-01-01T10:30:00") @RequestParam LocalDateTime date) {
 
                 WalletValueDTO walletValue = walletValuationService.getHistoricalWalletValue(walletId, date);
@@ -127,7 +128,7 @@ public class WalletController {
                         @ApiResponse(responseCode = "500", description = "Internal server error")
         })
         public ResponseEntity<WalletPerformanceDTO> calculateWalletPerformance(
-                        @Parameter(description = "Wallet ID", required = true) @PathVariable Long walletId,
+                        @Parameter(description = "Wallet UUID", required = true) @PathVariable UUID walletId,
                         @Parameter(description = "Date to calculate performance", required = true, example = "2024-01-01T10:30:00") @RequestParam LocalDateTime date) {
 
                 WalletPerformanceDTO performance = walletValuationService.calculateWalletPerformance(walletId, date);

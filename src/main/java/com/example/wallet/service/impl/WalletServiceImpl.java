@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.example.wallet.entity.WalletEntity;
+import com.example.wallet.exception.WalletNotFoundException;
 import com.example.wallet.mapper.WalletMapper;
 import com.example.wallet.model.WalletDTO;
 import com.example.wallet.repository.WalletRepository;
@@ -31,9 +32,9 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public WalletDTO getWallet(Long walletId) {
-        WalletEntity wallet = walletRepository.findById(walletId)
-                .orElseThrow(() -> new IllegalArgumentException("Wallet not found with ID: " + walletId));
+    public WalletDTO getWallet(UUID walletId) {
+        WalletEntity wallet = walletRepository.findByUuid(walletId)
+                .orElseThrow(() -> new WalletNotFoundException(walletId));
 
         return walletMapper.toWalletDTO(wallet);
     }

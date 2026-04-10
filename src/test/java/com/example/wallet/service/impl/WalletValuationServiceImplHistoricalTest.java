@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +42,7 @@ class WalletValuationServiceImplHistoricalTest {
         private WalletValuationServiceImpl walletValuationService;
 
         private WalletEntity mockWallet;
+        private UUID walletUuid;
         private LocalDateTime queryDate;
         private LocalDateTime purchaseDate;
 
@@ -48,10 +51,13 @@ class WalletValuationServiceImplHistoricalTest {
                 queryDate = LocalDateTime.of(2026, 1, 15, 10, 0, 0);
                 purchaseDate = LocalDateTime.of(2025, 12, 1, 10, 0, 0);
 
+                walletUuid = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
+
                 mockWallet = new WalletEntity();
                 mockWallet.setId(1L);
+                mockWallet.setUuid(walletUuid);
 
-                when(walletRepository.existsById(1L)).thenReturn(true);
+                when(walletRepository.findByUuid(walletUuid)).thenReturn(Optional.of(mockWallet));
         }
 
         @Test
@@ -72,11 +78,11 @@ class WalletValuationServiceImplHistoricalTest {
                                 .thenReturn(BigDecimal.valueOf(42000));
 
                 // Act
-                WalletValueDTO result = walletValuationService.getHistoricalWalletValue(1L, queryDate);
+                WalletValueDTO result = walletValuationService.getHistoricalWalletValue(walletUuid, queryDate);
 
                 // Assert
                 assertNotNull(result);
-                assertEquals(1L, result.walletId());
+                assertEquals(walletUuid, result.walletId());
                 assertEquals(BigDecimal.valueOf(21000).setScale(2), result.totalValue().setScale(2));
                 assertEquals(1, result.assetValues().size());
                 assertEquals("BTC", result.assetValues().get(0).symbol());
@@ -100,7 +106,7 @@ class WalletValuationServiceImplHistoricalTest {
                                 .thenReturn(BigDecimal.valueOf(42000));
 
                 // Act
-                WalletValueDTO result = walletValuationService.getHistoricalWalletValue(1L, queryDate);
+                WalletValueDTO result = walletValuationService.getHistoricalWalletValue(walletUuid, queryDate);
 
                 // Assert
                 assertNotNull(result);
@@ -117,11 +123,11 @@ class WalletValuationServiceImplHistoricalTest {
                                 .thenReturn(List.of());
 
                 // Act
-                WalletValueDTO result = walletValuationService.getHistoricalWalletValue(1L, queryDate);
+                WalletValueDTO result = walletValuationService.getHistoricalWalletValue(walletUuid, queryDate);
 
                 // Assert
                 assertNotNull(result);
-                assertEquals(1L, result.walletId());
+                assertEquals(walletUuid, result.walletId());
                 assertEquals(BigDecimal.ZERO.setScale(1), result.totalValue().setScale(1));
                 assertEquals(0, result.assetValues().size());
         }
@@ -154,7 +160,7 @@ class WalletValuationServiceImplHistoricalTest {
                                 .thenReturn(BigDecimal.valueOf(2500));
 
                 // Act
-                WalletValueDTO result = walletValuationService.getHistoricalWalletValue(1L, queryDate);
+                WalletValueDTO result = walletValuationService.getHistoricalWalletValue(walletUuid, queryDate);
 
                 // Assert
                 assertNotNull(result);
@@ -181,11 +187,11 @@ class WalletValuationServiceImplHistoricalTest {
                                 .thenReturn(BigDecimal.ZERO);
 
                 // Act
-                WalletValueDTO result = walletValuationService.getHistoricalWalletValue(1L, queryDate);
+                WalletValueDTO result = walletValuationService.getHistoricalWalletValue(walletUuid, queryDate);
 
                 // Assert
                 assertNotNull(result);
-                assertEquals(1L, result.walletId());
+                assertEquals(walletUuid, result.walletId());
                 assertEquals(BigDecimal.ZERO.setScale(1), result.totalValue().setScale(1));
                 assertEquals(1, result.assetValues().size());
         }
@@ -209,7 +215,7 @@ class WalletValuationServiceImplHistoricalTest {
                                 .thenReturn(BigDecimal.valueOf(42000));
 
                 // Act
-                WalletValueDTO result = walletValuationService.getHistoricalWalletValue(1L, sameDate);
+                WalletValueDTO result = walletValuationService.getHistoricalWalletValue(walletUuid, sameDate);
 
                 // Assert
                 assertNotNull(result);

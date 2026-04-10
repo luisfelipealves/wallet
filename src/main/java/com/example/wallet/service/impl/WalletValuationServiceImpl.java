@@ -5,11 +5,13 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.wallet.exception.WalletNotFoundException; // Custom exception
+import com.example.wallet.entity.WalletEntity;
 import com.example.wallet.model.*;
 import com.example.wallet.repository.AssetRepository;
 import com.example.wallet.repository.WalletRepository;
@@ -33,22 +35,23 @@ public class WalletValuationServiceImpl implements WalletValuationService {
         private final AssetPricesCacheService priceService;
 
         @Override
-        public WalletValueDTO getCurrentWalletValue(long walletId) {
-                validateWallet(walletId);
+        public WalletValueDTO getCurrentWalletValue(UUID walletId) {
+                WalletEntity wallet = findWalletByUuid(walletId);
 
-                var assets = assetRepository.findAggregatedAssetsByWalletId(walletId).stream()
-                                .map(agg -> toAssetDTO(agg, walletId, priceService.getCurrentAssetPrice(agg.symbol())))
+                var assets = assetRepository.findAggregatedAssetsByWalletId(wallet.getId()).stream()
+                                .map(agg -> toAssetDTO(agg, wallet.getId(),
+                                                priceService.getCurrentAssetPrice(agg.symbol())))
                                 .toList();
 
                 return new WalletValueDTO(walletId, calculateTotalValue(assets), assets);
         }
 
         @Override
-        public WalletValueDTO getHistoricalWalletValue(long walletId, LocalDateTime date) {
-                validateWallet(walletId);
+        public WalletValueDTO getHistoricalWalletValue(UUID walletId, LocalDateTime date) {
+                WalletEntity wallet = findWalletByUuid(walletId);
 
-                var assets = assetRepository.findAggregatedAssetsByWalletIdAndDate(walletId, date).stream()
-                                .map(agg -> toAssetDTO(agg, walletId,
+                var assets = assetRepository.findAggregatedAssetsByWalletIdAndDate(wallet.getId(), date).stream()
+                                .map(agg -> toAssetDTO(agg, wallet.getId(),
                                                 priceService.getHistoricalAssetPrice(agg.symbol(), date)))
                                 .toList();
 
@@ -56,10 +59,10 @@ public class WalletValuationServiceImpl implements WalletValuationService {
         }
 
         @Override
-        public WalletPerformanceDTO calculateWalletPerformance(long walletId, LocalDateTime date) {
-                validateWallet(walletId);
+        public WalletPerformanceDTO calculateWalletPerformance(UUID walletId, LocalDateTime date) {
+                WalletEntity wallet = findWalletByUuid(walletId);
 
-                var performances = assetRepository.findByWalletId(walletId).stream()
+                var performances = assetRepository.findByWalletId(wallet.getId()).stream()
                                 .filter(asset -> !asset.getPurchaseDate().isAfter(date))
                                 .map(asset -> createPerformanceDTO(asset, date))
                                 .sorted(Comparator.comparing(AssetPerformanceDTO::performancePercentage).reversed())
@@ -75,10 +78,9 @@ public class WalletValuationServiceImpl implements WalletValuationService {
                                 performances);
         }
 
-        private void validateWallet(long walletId) {
-                if (!walletRepository.existsById(walletId)) {
-                        throw new WalletNotFoundException(walletId);
-                }
+        private WalletEntity findWalletByUuid(UUID walletId) {
+                return walletRepository.findByUuid(walletId)
+                                .orElseThrow(() -> new WalletNotFoundException(walletId));
         }
 
         private AssetDTO toAssetDTO(AssetDTO agg, long walletId, BigDecimal price) {

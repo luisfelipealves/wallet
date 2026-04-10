@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.wallet.entity.AssetEntity;
+import com.example.wallet.entity.WalletEntity;
 import com.example.wallet.model.WalletPerformanceDTO;
 import com.example.wallet.repository.AssetRepository;
 import com.example.wallet.repository.WalletRepository;
@@ -40,14 +43,19 @@ class WalletValuationServiceImplPerformanceTest {
         private WalletValuationServiceImpl walletValuationService;
 
         private LocalDateTime testDate;
-        private long walletId;
+        private UUID walletId;
+        private WalletEntity mockWallet;
 
         @BeforeEach
         void setUp() {
-                walletId = 1L;
+                walletId = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
                 testDate = LocalDateTime.of(2024, 3, 27, 12, 0, 0);
 
-                when(walletRepository.existsById(walletId)).thenReturn(true);
+                mockWallet = new WalletEntity();
+                mockWallet.setId(1L);
+                mockWallet.setUuid(walletId);
+
+                when(walletRepository.findByUuid(walletId)).thenReturn(Optional.of(mockWallet));
         }
 
         @Test
@@ -58,7 +66,7 @@ class WalletValuationServiceImplPerformanceTest {
                 AssetEntity eth = createAsset("ETH", new BigDecimal("2000"));
                 AssetEntity ada = createAsset("ADA", new BigDecimal("0.8"));
 
-                when(assetRepository.findByWalletId(walletId))
+                when(assetRepository.findByWalletId(1L))
                                 .thenReturn(List.of(btc, eth, ada));
 
                 when(assetPricesCacheService.getHistoricalAssetPrice("BTC", testDate))
@@ -96,7 +104,7 @@ class WalletValuationServiceImplPerformanceTest {
                 AssetEntity asset1 = createAsset("ASSET1", new BigDecimal("100"));
                 AssetEntity asset2 = createAsset("ASSET2", new BigDecimal("100"));
 
-                when(assetRepository.findByWalletId(walletId))
+                when(assetRepository.findByWalletId(1L))
                                 .thenReturn(List.of(asset1, asset2));
 
                 when(assetPricesCacheService.getHistoricalAssetPrice("ASSET1", testDate))
@@ -120,7 +128,7 @@ class WalletValuationServiceImplPerformanceTest {
                 AssetEntity asset1 = createAsset("ASSET1", new BigDecimal("100"));
                 AssetEntity asset2 = createAsset("ASSET2", new BigDecimal("100"));
 
-                when(assetRepository.findByWalletId(walletId))
+                when(assetRepository.findByWalletId(1L))
                                 .thenReturn(List.of(asset1, asset2));
 
                 when(assetPricesCacheService.getHistoricalAssetPrice("ASSET1", testDate))
@@ -143,7 +151,7 @@ class WalletValuationServiceImplPerformanceTest {
                 // Arrange
                 AssetEntity asset = createAsset("BTC", new BigDecimal("40000"));
 
-                when(assetRepository.findByWalletId(walletId))
+                when(assetRepository.findByWalletId(1L))
                                 .thenReturn(List.of(asset));
 
                 when(assetPricesCacheService.getHistoricalAssetPrice("BTC", testDate))
@@ -165,7 +173,7 @@ class WalletValuationServiceImplPerformanceTest {
                 // Arrange
                 AssetEntity asset = createAsset("STABLE", new BigDecimal("100"));
 
-                when(assetRepository.findByWalletId(walletId))
+                when(assetRepository.findByWalletId(1L))
                                 .thenReturn(List.of(asset));
 
                 when(assetPricesCacheService.getHistoricalAssetPrice("STABLE", testDate))
@@ -185,7 +193,7 @@ class WalletValuationServiceImplPerformanceTest {
                 // Arrange
                 AssetEntity asset = createAsset("UNKNOWN", new BigDecimal("100"));
 
-                when(assetRepository.findByWalletId(walletId))
+                when(assetRepository.findByWalletId(1L))
                                 .thenReturn(List.of(asset));
 
                 when(assetPricesCacheService.getHistoricalAssetPrice("UNKNOWN", testDate))
@@ -203,7 +211,7 @@ class WalletValuationServiceImplPerformanceTest {
         @DisplayName("Should throw exception when no assets found")
         void testCalculateWalletPerformance_NoAssets_ThrowsException() {
                 // Arrange
-                when(assetRepository.findByWalletId(walletId))
+                when(assetRepository.findByWalletId(1L))
                                 .thenReturn(List.of());
 
                 // Act & Assert
